@@ -1,0 +1,48 @@
+!Este programa simula un movimiento oscilatorio amortiguado.
+
+program damped_oscillator
+
+  implicit none
+  
+  !real*8 es para declarar mis variables con doble precision
+
+  real*8 :: m, k, b, h, tmax, t, x, v, a
+  integer :: i
+
+  !Establezco los parámetros del movimiento oscilatorio amortiguado.
+  
+  m = 0.5  ! Es la masa.
+  k = 4.0  ! Es la constante elástica.
+  b = 2.828427 ! Coeficiente de amortiguamiento.
+  h = 0.01  ! Paso de tiempo.
+  tmax = 15.0  ! Tiempo máximo de movimiento, es decir, cuanto tiempo dura el movimiento.
+
+  !Establezco mis condiciones iniciales.
+  
+  x = 1.0  ! Posición inicial.
+  v = 0.0  ! Velocidad inicial.
+
+  !Abro el archivo que contendrá los datos que obtenga.
+  
+  open(unit=10, file='oscillator_case2.inp')
+  write(10,*) 
+
+  !Inicio con el bucle principal para ir iterando cada punto discreto.
+  
+  t = 0.0
+  do i = 1, int(tmax/h) + 1
+    a = -(k/m)*x - (b/m)*v
+    x = x + v*h + 0.5*a*h**2
+    v = v + a*h
+    t = t + h
+
+    !Aquí se escriben los resultados en el archivo externo.
+    write(10,*) t, x
+  end do
+
+  !Cierro el archivo.
+  close(10)
+  
+20 format(3F15.8)
+
+end program damped_oscillator
