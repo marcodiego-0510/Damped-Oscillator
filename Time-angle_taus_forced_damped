@@ -1,4 +1,5 @@
 #Este código calcula la dinámica de un oscilador forzado y amortiguado.
+#Genera las gráficas tiempo - ángulo.
 #Se importan las librerias necesarias para la simulación.
 import numpy as np
 import matplotlib.pyplot as plt
