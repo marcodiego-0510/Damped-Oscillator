@@ -1,0 +1,62 @@
+#Este código calcula la dinámica de un oscilador forzado y amortiguado.
+#Se importan las librerias necesarias para la simulación.
+import numpy as np
+import matplotlib.pyplot as plt
+
+#Se definen los métodos o funciones.
+#En este caso sólo la función del oscilador.
+#La función consiste en usar las transformaciones.
+def pendulo(y, t, nu, tau, f):
+   x1,x2 = y
+   dx1_dt = x2
+   dx2_dt = -nu*x2 - np.sin(x1) + tau*np.sin(2*np.pi*f*t)
+   return [dx1_dt, dx2_dt]
+
+# Método de Runge-Kutta de cuarto orden
+def runge_kutta4(f, y0, t, nu, tau, pendulo): 
+    n = len(t)
+    y = np.zeros((n, len(y0)))
+    y[0] = y0
+    for i in range(n-1):
+        h = t[i+1] - t[i]
+        k1 = h * np.array(f(y[i], t[i], nu, tau, pendulo)) 
+        k2 = h * np.array(f(y[i] + 0.5*k1, t[i] + 0.5*h, nu, tau, pendulo)) 
+        k3 = h * np.array(f(y[i] + 0.5*k2, t[i] + 0.5*h, nu, tau, pendulo))
+        k4 = h * np.array(f(y[i] + k3, t[i+1], nu, tau, pendulo)) 
+        y[i+1] = y[i] + (1/6)*(k1 + 2*k2 + 2*k3 + k4)
+    return y
+
+#Se establecen las condiciones iniciales.
+#Se elige el ángulo de 45 para que oscile.
+#En el diagrama aproximadamente se dislumbra el ángulo.
+#La mayoría de parámetros están en 1.
+#Se elige el 1 para estar en el estado basal o neutro.  
+y0 = [np.pi/4, 0]
+nu = 1.0
+tau = 1.0
+f = 1.0
+
+#Establezco mi array de tiempo con 1000 puntos.
+t = np.linspace(0, 10, 1000)
+
+#Se resuelve la ecuación diferencial.
+#Se extraen las soluciones en "angulo".
+solucion = runge_kutta4(pendulo, y0, t, nu, tau, f) 
+angulo = solucion[:, 0]
+
+#Los datos "angulo" se guardan en un archivo externo.
+#Establecemos formato de los datos.
+#Los datos tienen 6 cifras de precisión.
+archivo = "solucion.txt"  #
+with open(archivo, 'w') as file:
+    for i in range(len(t)):
+        linea = f"{t[i]:.6f}\t{angulo[i]:.6f}\n" 
+        file.write(linea)
+
+#Se crea la gráfica.
+#Se grafica tiempo - ángulo.
+plt.plot(t, angulo)
+plt.title('Gráfica de la dinámica del péndulo.')
+plt.xlabel('Tiempo')
+plt.ylabel('Ángulo')
+plt.show()
