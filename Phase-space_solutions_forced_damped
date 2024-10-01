@@ -1,0 +1,60 @@
+#Este código calcula la dinámica de un oscilador forzado y amortiguado.
+#Se grafica el espacio fase.
+#Se importan las librerias necesarias para la simulación.
+import numpy as np
+import matplotlib.pyplot as plt
+
+#Se definen los métodos o funciones.
+#En este caso sólo la función del oscilador.
+#La función consiste en usar las transformaciones.
+def pendulo(y, t, nu, tau, f):
+   x1,x2 = y
+   dx1_dt = x2
+   dx2_dt = -nu*x2 - np.sin(x1) + tau*np.sin(2*np.pi*f*t)
+   return [dx1_dt, dx2_dt]
+
+# Método de Runge-Kutta de cuarto orden
+def runge_kutta4(f, y0, t, nu, tau, pendulo): 
+    n = len(t)
+    y = np.zeros((n, len(y0)))
+    y[0] = y0
+    for i in range(n-1):
+        h = t[i+1] - t[i]
+        k1 = h * np.array(f(y[i], t[i], nu, tau, pendulo)) 
+        k2 = h * np.array(f(y[i] + 0.5*k1, t[i] + 0.5*h, nu, tau, pendulo)) 
+        k3 = h * np.array(f(y[i] + 0.5*k2, t[i] + 0.5*h, nu, tau, pendulo))
+        k4 = h * np.array(f(y[i] + k3, t[i+1], nu, tau, pendulo)) 
+        y[i+1] = y[i] + (1/6)*(k1 + 2*k2 + 2*k3 + k4)
+    return y
+
+#Se establecen las condiciones iniciales.
+#Se elige el ángulo de 45 para que oscile.
+#En el diagrama aproximadamente se dislumbra el ángulo.
+#La mayoría de parámetros están en 1.
+#Se elige el 1 para estar en el estado basal o neutro.  
+y0_1 = [np.pi/4, 0]  # Conjunto 1.
+y0_2 = [np.pi/4 + 0.001, 0]  # Conjunto 2, con la perturbación.
+nu = 0.5
+tau = 0.9
+f = 1/(6*np.pi)
+
+#Establezco mi array de tiempo con 1000 puntos.
+t = np.linspace(0, 100, 1000)
+
+#Se resuelve la ecuación diferencial.
+#Se extraen las soluciones.
+solucion1 = runge_kutta4(pendulo, y0_1, t, nu, tau, f)
+solucion2 = runge_kutta4(pendulo, y0_2, t, nu, tau, f)
+g_s1, g_s11 = solucion1.T
+g_s2, g_s22 = solucion2.T
+
+# Graficar en el espacio fase de los dos conjuntos.
+plt.figure(figsize=(12, 6))
+plt.plot(g_s1, g_s11, label='Condiciones iniciales 1')
+plt.plot(g_s2, g_s22, label='Condiciones iniciales 2')
+plt.title('Espacio Fase')
+plt.xlabel('Ángulo (θ)')
+plt.ylabel('Velocidad angular (dθ/dt)')
+plt.legend()
+plt.grid(True)
+plt.show()
